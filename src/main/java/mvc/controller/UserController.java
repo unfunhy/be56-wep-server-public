@@ -63,22 +63,4 @@ public class UserController implements Controller {
         model.setAttributes("userList", userService.getAllUsers());
         return "user/list";
     }
-
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public String test(HttpRequest request, Model model) {
-        UserDto dto = UserDto.builder()
-                .userId("asdf")
-                .build();
-        UserDto dto2 = UserDto.builder()
-                .userId("aaa")
-                .build();
-        UserDto dto3 = UserDto.builder()
-                .userId("bbb")
-                .build();
-        List<UserDto> tmp = Arrays.asList(dto, dto2, dto3);
-//        model.setAttributes("user", dto);
-        model.setAttributes("user", tmp);
-        model.setAttributes("testModelValue", "test!!!");
-        return "test";
-    }
 }

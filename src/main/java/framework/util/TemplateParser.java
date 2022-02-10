@@ -12,12 +12,12 @@ import java.util.regex.Pattern;
 
 public class TemplateParser {
 
-    private final String INLINE_PATTERN_REGEX = ".*\\{\\{([a-zA-Z0-9]+)}}.*";
-    private final String BLOCK_OPEN_REGEX = ".*\\{\\{#([a-zA-Z0-9]+)}}.*";
-    private final String BLOCK_CLOSE_REGEX = ".*\\{\\{/([a-zA-Z0-9]+)}}.*";
-    private final String UNIT_INLINE_PATTERN_REGEX = "\\{\\{([a-zA-Z0-9]+)}}";
-    private final String UNIT_BLOCK_OPEN_REGEX = "\\{\\{#([a-zA-Z0-9]+)}}";
-    private final String UNIT_BLOCK_CLOSE_REGEX = "\\{\\{/([a-zA-Z0-9]+)}}";
+    private final String INLINE_PATTERN_REGEX = ".*\\{\\{(.+?)}}.*";
+    private final String BLOCK_OPEN_REGEX = ".*\\{\\{#(.+?)}}.*";
+
+    private final String UNIT_INLINE_PATTERN_REGEX = "\\{\\{(.+?)}}";
+    private final String UNIT_BLOCK_OPEN_REGEX = "\\{\\{#(.+?)}}";
+    private final String UNIT_BLOCK_CLOSE_REGEX = "\\{\\{/(.+?)}}";
     private final String NEW_LINE = "\r\n";
 
     private final Pattern INLINE_PATTERN = Pattern.compile(UNIT_INLINE_PATTERN_REGEX);
@@ -68,7 +68,7 @@ public class TemplateParser {
         Object targetObj;
         try {
             targetObj = model.getAttributes(targetComponentName);
-            checkModelAttributeExist(targetObj);
+            checkModelAttributeExist(targetObj, targetComponentName);
         } catch (Exception e) {
             return "";
         }
@@ -99,7 +99,7 @@ public class TemplateParser {
         } catch (Exception e) {
             replacementObj = model.getAttributes(targetAttributeName);
         }
-        checkModelAttributeExist(replacementObj);
+        checkModelAttributeExist(replacementObj, targetAttributeName);
         return replacementObj.toString();
     }
 
@@ -114,17 +114,17 @@ public class TemplateParser {
     private String getAllHtmlElementsWrappedAsBlock(String line, BufferedReader br) throws IOException {
         Matcher matcher = BLOCK_CLOSE_PATTERN.matcher(line);
         StringBuilder builder = new StringBuilder();
-        builder.append(line.replaceAll(BLOCK_OPEN_REGEX, "")).append(NEW_LINE);
+        builder.append(line.replaceAll(UNIT_BLOCK_OPEN_REGEX, "")).append(NEW_LINE);
         while (!matcher.find() && (line = br.readLine()) != null) {
             builder.append(line).append(NEW_LINE);
             matcher = BLOCK_CLOSE_PATTERN.matcher(line);
         }
-        return builder.toString().replaceAll(BLOCK_CLOSE_REGEX, "");
+        return builder.toString().replaceAll(UNIT_BLOCK_CLOSE_REGEX, "");
     }
 
-    private void checkModelAttributeExist(Object obj) {
+    private void checkModelAttributeExist(Object obj, String targetAttributeName) {
         if (obj == null) {
-            throw new IllegalArgumentException("템플릿 엔진 에러: 모델을 찾을 수 없습니다.");
+            throw new IllegalArgumentException(String.format("템플릿 엔진 에러: \"%s\" 모델을 찾을 수 없습니다.", targetAttributeName));
         }
     }
 }
